@@ -31,7 +31,9 @@ class Product:
 
     def __str__(self):
         """Строковое представление продукта."""
-        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+        # Форматируем цену как целое число, если она целая
+        price_str = f"{int(self.price)}" if self.price.is_integer() else f"{self.price}"
+        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
 
 class Category:
@@ -47,13 +49,12 @@ class Category:
         # Изначальные продукты в списке не увеличивают Category.product_count,
         # так как это происходит только через метод add_product.
 
-    def add_product(self, product: Product):
+    def add_product(self, product):
         """
         Добавляет продукт в приватный атрибут __products.
         Прибавляет 1 к класс-атрибуту «счетчик продуктов».
         """
         if not isinstance(product, Product):
-            # Можно добавить обработку ошибки, если передан не продукт
             print("Ошибка: можно добавлять только объекты класса Product.")
             return
 
@@ -72,10 +73,9 @@ class Category:
         
         product_output_string = ""
         for prod in self.__products:
-            # Используем __str__ из Product, если он возвращает нужный формат БЕЗ 
-
-            # Или форматируем здесь напрямую:
-            product_output_string += f"{prod.name}, {prod.price} руб. Остаток: {prod.quantity} шт.\n"
+            # Используем тот же формат, что и в Product.__str__
+            price_str = f"{int(prod.price)}" if prod.price.is_integer() else f"{prod.price}"
+            product_output_string += f"{prod.name}, {price_str} руб. Остаток: {prod.quantity} шт.\n"
         return product_output_string
 
 

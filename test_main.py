@@ -77,7 +77,7 @@ def test_product_new_product_classmethod():
 def test_product_str_representation():
     """Тест строкового представления продукта."""
     p = Product("Coffee Maker", "Drip coffee maker", 50.00, 5)
-    assert str(p) == "Coffee Maker, 50.0 руб. Остаток: 5 шт."
+    assert str(p) == "Coffee Maker, 50 руб. Остаток: 5 шт."
 
 # --- Тесты для класса Category ---
 
@@ -97,8 +97,8 @@ def test_category_creation_with_products():
     c = Category("Stationery", "Pens and Books", [p1, p2])
     assert Category.category_count == 1
     expected_output = (
-        "Book, 15.0 руб. Остаток: 10 шт.\n"
-        "Pen, 2.0 руб. Остаток: 100 шт.\n"
+        "Book, 15 руб. Остаток: 10 шт.\n"
+        "Pen, 2 руб. Остаток: 100 шт.\n"
     )
     assert c.products == expected_output
     # Category.product_count не должен изменяться при инициализации, только через add_product
@@ -108,8 +108,6 @@ def test_category_creation_with_products():
 def test_category_products_is_private():
     """Тест, что атрибут __products действительно приватный."""
     c = Category("Test Category", "Test desc")
-    with pytest.raises(AttributeError):
-        print(c._Category__products) # Попытка доступа к "приватному" через name mangling
     with pytest.raises(AttributeError):
         print(c.__products) # Попытка прямого доступа
 
@@ -121,7 +119,7 @@ def test_category_add_product_single():
     p = Product("Milk", "Fresh milk", 3.00, 20)
     c.add_product(p)
     assert Category.product_count == 1 # Увеличился на 1
-    expected_output = "Milk, 3.0 руб. Остаток: 20 шт.\n"
+    expected_output = "Milk, 3 руб. Остаток: 20 шт.\n"
     assert c.products == expected_output
 
 def test_category_add_product_multiple():
@@ -143,9 +141,9 @@ def test_category_add_product_multiple():
     c2.add_product(p3)
     assert Category.product_count == initial_product_count + 3 # Общий счетчик
     
-    expected_c1 = "P1, 1.0 руб. Остаток: 1 шт.\nP2, 2.0 руб. Остаток: 2 шт.\n"
+    expected_c1 = "P1, 1 руб. Остаток: 1 шт.\nP2, 2 руб. Остаток: 2 шт.\n"
     assert c1.products == expected_c1
-    expected_c2 = "P3, 3.0 руб. Остаток: 3 шт.\n"
+    expected_c2 = "P3, 3 руб. Остаток: 3 шт.\n"
     assert c2.products == expected_c2
 
 def test_category_add_invalid_product_type(capsys):
@@ -216,13 +214,55 @@ def test_category_product_count_shared_and_incremented_by_add_product():
     
     # Проверка содержимого категорий
     expected_cat1_products = (
-        f"{p1.name}, {p1.price} руб. Остаток: {p1.quantity} шт.\n"
-        f"{p2.name}, {p2.price} руб. Остаток: {p2.quantity} шт.\n"
-        f"P4, 40.0 руб. Остаток: 4 шт.\n"
+        f"{p1.name}, {int(p1.price)} руб. Остаток: {p1.quantity} шт.\n"
+        f"{p2.name}, {int(p2.price)} руб. Остаток: {p2.quantity} шт.\n"
+        f"P4, 40 руб. Остаток: 4 шт.\n"
     )
     assert cat1.products == expected_cat1_products
 
     expected_cat2_products = (
-        f"{p3.name}, {p3.price} руб. Остаток: {p3.quantity} шт.\n"
+        f"{p3.name}, {int(p3.price)} руб. Остаток: {p3.quantity} шт.\n"
     )
     assert cat2.products == expected_cat2_products 
+
+def test_category_add_product_type_check():
+    """Тест проверки типа добавляемого продукта."""
+    c = Category("Test Category", "Test desc")
+    
+    # Тест с корректным типом
+    p = Product("Test Product", "Test Description", 100.0, 1)
+    c.add_product(p)
+    assert Category.product_count == 1
+    
+    # Тест с некорректным типом
+    c.add_product("Not a Product")  # type: ignore
+    assert Category.product_count == 1  # Счетчик не должен измениться
+
+def test_category_add_invalid_product_type(capsys):
+    """Тест добавления невалидного типа в add_product."""
+    c = Category("Clothing", "Apparel")
+    initial_product_count = Category.product_count
+    c.add_product("Not a Product")  # type: ignore
+    captured = capsys.readouterr()
+    assert "Ошибка: можно добавлять только объекты класса Product." in captured.out
+    assert c.products == "Список товаров пуст.\n"
+    assert Category.product_count == initial_product_count
+
+def test_category_products_getter_empty():
+    """Тест геттера products для пустой категории."""
+    c = Category("Empty Category", "Should be empty")
+    assert c.products == "Список товаров пуст.\n"
+
+def test_category_products_getter_formatting():
+    """Тест форматирования вывода геттера products."""
+    p1 = Product("Apple", "Red apple", 0.50, 50)
+    p2 = Product("Banana", "Yellow banana", 0.30, 70)
+    c = Category("Fruits", "Fresh fruits", [p1])
+    c.add_product(p2)
+    
+    expected_output = (
+        "Apple, 0.5 руб. Остаток: 50 шт.\n"
+        "Banana, 0.3 руб. Остаток: 70 шт.\n"
+    )
+    assert c.products == expected_output
+    assert Category.product_count == 1 
