@@ -28,10 +28,16 @@ class Product:
             self.__price = float(new_price)
         else:
             print("Цена не должна быть нулевая или отрицательная")
+            # Цена не меняется, если некорректная
 
     def __str__(self):
         """Строковое представление продукта."""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        if isinstance(other, Product):
+            return self.price * self.quantity + other.price * other.quantity
+        raise TypeError("Можно складывать только с другим Product")
 
 
 class Category:
@@ -66,13 +72,42 @@ class Category:
         Возвращает строку со всеми продуктами в формате:
         "Название продукта, X руб. Остаток: X шт.\n"
         """
+        return self.__products
+
+    def products_str(self):
         if not self.__products:
             return "Список товаров пуст.\n"
-        
         product_output_string = ""
         for prod in self.__products:
             product_output_string += f"{prod.name}, {prod.price} руб. Остаток: {prod.quantity} шт.\n"
         return product_output_string
+
+    def average_price(self):
+        if not self.__products:
+            return 0
+        return sum(p.price for p in self.__products) / len(self.__products)
+
+
+class Smartphone(Product):
+    def __init__(self, name, description, price, quantity, performance, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.performance = performance
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+class LawnGrass(Product):
+    def __init__(self, name, description, price, quantity, country, germination_period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
 
 if __name__ == "__main__":
@@ -87,13 +122,13 @@ if __name__ == "__main__":
     )
 
     print(f"Товары в категории {category1.name} до добавления:")
-    print(category1.products) # Выведет список из 3 товаров
+    print(category1.products_str()) # Выведет список из 3 товаров
 
     product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
     category1.add_product(product4) # Category.product_count станет 1
 
     print(f"Товары в категории {category1.name} после добавления:")
-    print(category1.products) # Выведет список из 4 товаров
+    print(category1.products_str()) # Выведет список из 4 товаров
     
     # Этот print выведет значение класс-атрибута Category.product_count
     print(f"Общий счетчик добавленных продуктов (Category.product_count): {category1.product_count}")
@@ -139,10 +174,10 @@ if __name__ == "__main__":
     )
     # Category.product_count был 1, после этого add_product станет 2
     
-    print(user_category1.products)
+    print(user_category1.products_str())
     user_product4 = Product("55\" QLED 4K (User)", "Фоновая подсветка", 123000.0, 7)
     user_category1.add_product(user_product4) # Category.product_count станет 2
-    print(user_category1.products)
+    print(user_category1.products_str())
     print(f"Category.product_count (после действий пользователя): {user_category1.product_count}") # Ожидается 2
 
     new_product_instance_user = Product.new_product(
