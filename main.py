@@ -31,9 +31,7 @@ class Product:
 
     def __str__(self):
         """Строковое представление продукта."""
-        # Форматируем цену как целое число, если она целая
-        price_str = f"{int(self.price)}" if self.price.is_integer() else f"{self.price}"
-        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
 
 class Category:
@@ -73,9 +71,7 @@ class Category:
         
         product_output_string = ""
         for prod in self.__products:
-            # Используем тот же формат, что и в Product.__str__
-            price_str = f"{int(prod.price)}" if prod.price.is_integer() else f"{prod.price}"
-            product_output_string += f"{prod.name}, {price_str} руб. Остаток: {prod.quantity} шт.\n"
+            product_output_string += f"{prod.name}, {prod.price} руб. Остаток: {prod.quantity} шт.\n"
         return product_output_string
 
 
